@@ -33,7 +33,23 @@ else
 fi
 
 # ---- 核数推导 P x Q（尽量接近正方形，且 P*Q=核数）----
+# 容器 CPU 配额优先(若有且小于 nproc)。AutoDL 等容器里 nproc 显示宿主机核数,
+# 实际可用是 cgroup 配额, 按 nproc 算进程数会导致严重超额订阅。
 CORES=$(nproc)
+if [ -r /sys/fs/cgroup/cpu.max ]; then
+  read CPU_QUOTA CPU_PERIOD < /sys/fs/cgroup/cpu.max 2>/dev/null || CPU_QUOTA=""
+  if [ -n "${CPU_QUOTA:-}" ] && [ "$CPU_QUOTA" != "max" ] && [ "$CPU_QUOTA" -gt 0 ] 2>/dev/null; then
+    CGROUP_CORES=$((CPU_QUOTA / CPU_PERIOD))
+    [ "$CGROUP_CORES" -lt "$CORES" ] && CORES=$CGROUP_CORES
+  fi
+elif [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then
+  QUOTA=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us 2>/dev/null || echo -1)
+  PERIOD=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us 2>/dev/null || echo 100000)
+  if [ "$QUOTA" -gt 0 ] 2>/dev/null; then
+    CGROUP_CORES=$((QUOTA / PERIOD))
+    [ "$CGROUP_CORES" -lt "$CORES" ] && CORES=$CGROUP_CORES
+  fi
+fi
 P=1
 for ((i=1; i*i<=CORES; i++)); do
   if (( CORES % i == 0 )); then P=$i; fi

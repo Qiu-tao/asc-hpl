@@ -1,12 +1,11 @@
 # 基础题仓库 — HPL
 
-> ⚠️ 这是一个模板，推到 GitHub 前请把「姓名/环境/日期」等占位信息补上。
 
 ## 基本信息（作业要求：姓名、对应题目、运行环境、复现方式）
 
-- **姓名**：（待填）
+- **姓名**：邱明涛
 - **题目**：基础题 — HPL (High Performance Linpack)
-- **日期**：（待填）
+- **日期**：2026/8/27
 - **机器环境**：见 `env_info.txt`（由 `collect_env.sh` 生成）
 - **软件版本**：OpenMPI（apt 安装）、OpenBLAS（apt 安装）、gfortran、HPL 2.3
 
@@ -41,7 +40,7 @@ bash run_baseline.sh
 
 ### 结果汇总表（2026-08-27 实测，AutoDL 西B区，Xeon 8352S 16核/62GB）
 
-所有运行：N=50000，16 进程，`OPENBLAS_NUM_THREADS=1`。日志见 `logs/`。
+正式运行（Baseline 与调参）：N=50000，16 进程，OPENBLAS_NUM_THREADS=1；小规模测试为 4 进程冒烟测试。日志见 logs/。
 
 | 组别 | N | NB | P×Q | 时间(s) | GFLOP/s | 正确性 |
 |---|---|---|---|---|---|---|

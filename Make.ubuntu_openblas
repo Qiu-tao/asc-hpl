@@ -1,0 +1,52 @@
+#  HPL make.inc —— Ubuntu 22.04/24.04 + OpenMPI + OpenBLAS
+#  放到 hpl-2.3 根目录下（文件名保持 Make.ubuntu_openblas），
+#  然后执行: make arch=ubuntu_openblas
+#  已在 Linux 沙箱实测：编译成功，小规模测试 PASSED。
+#
+SHELL        = /bin/sh
+CD           = cd
+CP           = cp
+LN_S         = ln -fs
+MKDIR        = mkdir -p
+RM           = /bin/rm -f
+TOUCH        = touch
+
+ARCH         = ubuntu_openblas
+
+TOPdir       = $(HOME)/hpl-2.3
+INCdir       = $(TOPdir)/include
+BINdir       = $(TOPdir)/bin/$(ARCH)
+LIBdir       = $(TOPdir)/lib/$(ARCH)
+
+HPLlib       = $(LIBdir)/libhpl.a
+
+# --- MPI (Ubuntu 的 libopenmpi-dev) ---
+MPdir        = /usr
+MPinc        = -I/usr/lib/x86_64-linux-gnu/openmpi/include
+MPlib        = -L/usr/lib/x86_64-linux-gnu -lmpi
+
+# --- BLAS (Ubuntu 的 libopenblas-dev) ---
+LAdir        = /usr
+LAinc        = -I/usr/include/x86_64-linux-gnu
+LAlib        = -L/usr/lib/x86_64-linux-gnu -lopenblas -lgfortran
+
+# --- Fortran/C 接口符号约定 (gfortran/OpenBLAS 用单下划线 Add_) ---
+F2CDEFS      = -DAdd_ -DF77_INTEGER=int -DStringSunStyle
+
+HPL_INCLUDES = -I$(INCdir) -I$(INCdir)/$(ARCH) $(LAinc) $(MPinc)
+HPL_LIBS     = $(HPLlib) $(LAlib) $(MPlib)
+
+HPL_OPTS     = -DHPL_DETAILED_TIMING
+
+HPL_DEFS     = $(F2CDEFS) $(HPL_OPTS) $(HPL_INCLUDES)
+
+CC           = mpicc
+CCNOOPT      = $(HPL_DEFS) -O1
+CCFLAGS      = $(HPL_DEFS) -O3 -funroll-loops
+
+LINKER       = $(CC)
+LINKFLAGS    = $(CCFLAGS)
+
+ARCHIVER     = ar
+ARFLAGS      = r
+RANLIB       = ranlib
